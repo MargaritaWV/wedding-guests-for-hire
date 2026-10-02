@@ -104,6 +104,10 @@ Supabase is connected and verified. The real Telegram bot token is verified, but
 - The real sale confirmation notification was delivered once, and a fresh website load shows the same pending record while approved income and commission remain zero.
 - Real zero-amount and 60/30/20 Telegram sale attempts were refused and created no Supabase records.
 - Svetlana's live manager screen relinked the same Telegram account to Kevin; the earlier sale still stores Richard and its original chat independently of the current link.
+- Real Telegram expense `TGTEST-EXP-1` reached Supabase as Kevin's €25.00 Travel expense, proposed for Project B and initially awaiting allocation; its confirmation was delivered to the original chat.
+- While awaiting allocation, the live dashboard counted the expense in the company result but excluded it from both projects.
+- Svetlana changed the sale split from 40/30/30 to 50/25/25 and changed the expense allocation from Project B to Project A. Both original proposals and final decisions remain separately stored.
+- The final dynamic results are €100 approved income, €10 commission, €25 Project A expense, and €65 company/Project A result. Both decision notification jobs report one successful delivery to each transaction's original chat.
 
 ### Public deployment and webhook state
 
@@ -112,14 +116,14 @@ Supabase is connected and verified. The real Telegram bot token is verified, but
 - Vercel project: created and connected to the homework repository with server-only environment values stored as protected settings.
 - Public Vercel deployment: live at `https://wedding-guests-for-hire-three.vercel.app`.
 - Telegram webhook: active at the authenticated public webhook route with no reported delivery error.
-- Real Telegram account transaction: verified for the temporary sale submission and confirmation.
-- Real Telegram manager-decision notification: not performed yet.
+- Real Telegram account transactions: verified for the temporary sale and expense submissions and confirmations.
+- Real Telegram manager-decision notifications: Supabase records both as sent; personal receipt confirmation is the remaining human check.
 
 ### Remaining Stage 3 work
 
-1. Submit the real temporary Kevin expense and verify its confirmation, stored reporter/chat, status, and financial treatment.
-2. Complete both manager decisions and verify the real Telegram notifications and safe retry behavior.
-3. Remove the temporary `TGTEST` records while keeping the useful real employee link.
+1. Confirm the two real manager-decision messages were visibly received in the student's Telegram chat.
+2. Reconfirm retry/idempotency safeguards, run the complete local quality checks, and review the public deployment.
+3. Remove the temporary `TGTEST` records and notification/decision jobs while keeping the useful real employee link.
 
 ### Known errors
 
@@ -127,4 +131,4 @@ No local code, database, test, or runtime errors are known. Vercel's first insta
 
 ### Exact next action
 
-From the relinked Kevin account, send `/start` and the documented `TGTEST-EXP-1` expense command, then confirm the bot recorded the expense.
+Confirm that Telegram received both the changed sale decision (40/30/30 to 50/25/25) and changed expense decision (Project B to Project A). Then finish cleanup and the final Stage 3 verification suite.
