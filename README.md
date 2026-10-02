@@ -102,23 +102,26 @@ Supabase is connected and verified. The real Telegram bot token is verified, but
 
 ### Public deployment and webhook state
 
-- Public Vercel deployment: not created yet.
+- GitHub repository: created, audited, and pushed to `MargaritaWV/wedding-guests-for-hire` on `main`.
+- Vercel repository access: authorized only for the homework repository, which is now visible in the import screen.
+- Public Vercel deployment: not created yet; deployment was stopped before project creation.
 - Telegram webhook: not active yet because no public HTTPS endpoint exists.
 - Real Telegram account transaction: not performed yet.
 - Real Telegram manager-decision notification: not performed yet.
 
 ### Remaining Stage 3 work
 
-1. Create or select the homework's GitHub repository and authorize access only to that repository.
-2. Import that repository into Vercel and add the existing server-only environment values.
-3. Register the secure Vercel webhook with Telegram.
-4. Perform the required real `/start`, unlinked denial, link/relink, temporary sale, temporary expense, and decision-notification checks.
-5. Remove the temporary `TGTEST` records while keeping the useful real employee link.
+1. Rotate the Supabase server secret and Telegram bot token because Vercel's import-screen diagnostics unexpectedly displayed the previously imported values in the private development session.
+2. Generate a fresh Telegram webhook secret and update the ignored local environment file.
+3. Import the repository into Vercel with the replacement server-only values and deploy it.
+4. Register the secure Vercel webhook with Telegram.
+5. Perform the required real `/start`, unlinked denial, link/relink, temporary sale, temporary expense, and decision-notification checks.
+6. Remove the temporary `TGTEST` records while keeping the useful real employee link.
 
 ### Known errors
 
-No local code, database, test, or build errors are known. Real end-to-end Telegram verification is blocked only by the required GitHub/Vercel account authorization and public URL.
+No local code, database, test, or build errors are known. The temporary environment-transfer file was deleted, and no secret was committed or deployed. Real end-to-end Telegram verification is paused until the displayed server credentials are replaced through their account owners.
 
 ### Exact next action
 
-Create an empty GitHub repository for this homework without adding a README, `.gitignore`, or license, then provide its non-secret repository URL. After that, the existing audited project can be pushed and imported into Vercel with repository-scoped authorization.
+Use BotFather to revoke and replace the bot token, and use the Supabase project's API Keys screen to create a replacement server secret. Store both replacements only in the ignored `.env.local` file, never in chat. After that, resume Stage 3 so the webhook secret can be regenerated and the Vercel deployment completed.
