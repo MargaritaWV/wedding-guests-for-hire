@@ -105,22 +105,23 @@ Supabase is connected and verified. The real Telegram bot token is verified, but
 - GitHub repository: created, audited, and pushed to `MargaritaWV/wedding-guests-for-hire` on `main`.
 - Vercel repository access: authorized only for the homework repository, which is now visible in the import screen.
 - Vercel project: created and connected to the homework repository with server-only environment values stored as protected settings.
-- Public Vercel deployment: awaiting the first post-connection GitHub push.
-- Telegram webhook: not active yet because no public HTTPS endpoint exists.
+- Public Vercel deployment: live at `https://wedding-guests-for-hire-three.vercel.app`.
+- Telegram webhook: active at the authenticated public webhook route with no reported delivery error.
 - Real Telegram account transaction: not performed yet.
 - Real Telegram manager-decision notification: not performed yet.
 
 ### Remaining Stage 3 work
 
-1. Trigger and verify the first Vercel production deployment.
-2. Set the deployed `APP_BASE_URL` and register the secure Vercel webhook with Telegram.
-3. Perform the required real `/start`, unlinked denial, link/relink, temporary sale, temporary expense, and decision-notification checks.
-4. Remove the temporary `TGTEST` records while keeping the useful real employee link.
+1. Perform the required real `/start` and unlinked-denial checks from the student's Telegram account.
+2. Link the real Telegram user to Richard, submit the temporary sale, and verify its stored employee and original chat.
+3. Relink the same user to Kevin, submit the temporary expense, and verify the earlier sale remains unchanged.
+4. Complete both manager decisions and verify the real Telegram notifications and safe retry behavior.
+5. Remove the temporary `TGTEST` records while keeping the useful real employee link.
 
 ### Known errors
 
-No local code, database, test, or build errors are known. The Telegram token and Supabase server secret were rotated and verified with minimal authenticated checks, and a fresh webhook secret was generated. No secret is committed or exposed to client code.
+No local code, database, test, or runtime errors are known. Vercel's first install stopped because pnpm required an explicit decision for `unrs-resolver`; the project now records `false`, so the script remains blocked and the corrected deployment succeeds. The rotated Telegram and Supabase credentials and fresh webhook secret are active without being committed or exposed to client code.
 
 ### Exact next action
 
-Push the current checkpoint to `main` so Vercel builds the first production deployment, then verify the public readiness endpoint before registering the Telegram webhook.
+From the real Telegram account, send `/start` to `@FriendsIncludedHomeworkBot`, then attempt the documented temporary unlinked sale. Use the numeric Telegram user ID returned by the bot for Svetlana's manager-only linking step.
