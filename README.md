@@ -1,13 +1,13 @@
 # Friends Included Finance System
 
-This repository contains the working Stage 3 website and Telegram integration for the Day 4 managerial accounting homework. Supabase is the source of truth; Telegram and the website share one server-side transaction processor; Google Sheets will later become a synchronized readable copy.
+This repository contains the working Stage 4 application for the Day 4 managerial accounting homework. Supabase is the source of truth; Telegram and the website share one server-side transaction processor; Google Sheets is an automatically synchronized readable copy.
 
 ## Current architecture
 
 - **Next.js with TypeScript:** one Vercel-compatible application for the website, server routes, webhook, and background retry endpoints.
 - **Supabase PostgreSQL:** authoritative employees, transactions, decisions, delivery state, and financial data.
 - **Telegram Bot API:** direct server-side HTTPS calls, with the original bot chat retained on Telegram submissions.
-- **Google Sheets API:** a server-only adapter will upsert one row per reference into `Sales` or `Expenses`.
+- **Google Sheets API:** a server-only adapter upserts one row per reference into `Sales` or `Expenses`.
 - **Zod and pure domain functions:** shared validation, permissions, commission rounding, and financial calculations used by every entry channel.
 
 Browser code will never receive the Supabase service-role key, Telegram bot token, or Google service-account private key. Database tables have row-level security enabled without browser policies; the server is the only intended data access path.
@@ -61,7 +61,7 @@ The existing initial migration already supports Stage 2. No additional migration
 ### Work completed in later stages
 
 - Stage 3: the real Telegram bot, employee linking, real notifications, retry delivery, GitHub repository, and Vercel deployment are complete.
-- Stage 4: connect a Google service account and spreadsheet, then implement reference-based row upserts and retries.
+- Stage 4: the real Google Sheets connection, reference-based row upserts, and retry handling are complete.
 - Final stage: complete the submission links/instructions and run the official Telegram-dependent Test 1 and Test 2 demonstrations.
 
 ### Known bugs
@@ -74,7 +74,7 @@ From normal Windows PowerShell in this project folder, run `corepack pnpm dev`, 
 
 ## External setup state
 
-Supabase is connected and verified. The real Telegram bot and authenticated public webhook are active. Google Sheets remains intentionally unconfigured.
+Supabase, the real Telegram bot and authenticated webhook, and Google Sheets are connected and verified in production.
 
 ## Stage 3 progress
 
@@ -137,7 +137,7 @@ Begin Stage 4 by creating or choosing a Google Cloud project, enabling the Googl
 
 ## Stage 4 progress
 
-### Completed locally
+### Completed
 
 - Reread the complete authoritative homework specification and confirmed Supabase remains the source of truth.
 - Identified the single downloaded service-account JSON by its project-related filename without inspecting unrelated Downloads files.
@@ -157,18 +157,17 @@ Begin Stage 4 by creating or choosing a Google Cloud project, enabling the Googl
 - Local service-account variables: configured privately with the replacement key.
 - Spreadsheet ID: configured locally from the user-provided URL.
 - Real spreadsheet headers and live synchronization: verified successfully for Sales and Expenses.
-- Vercel Google environment variables and deployment: not changed yet.
+- Protected Vercel environment variables: updated manually for Production and Preview without importing or displaying their values.
+- Production deployment: verified through the public readiness endpoint; Supabase, Telegram, and Google Sheets all report connected.
+- Telegram webhook: re-registered with the replacement secret and verified with no pending updates or reported delivery error.
 
-### Remaining Stage 4 work
+### Stage 4 status
 
-1. Update the named protected values manually in the existing Vercel project without using import, pull, preview, or value-revealing diagnostics.
-2. Push the already verified Stage 4 commit so the existing Vercel project deploys it.
-3. Verify the public connected state, reset the Telegram webhook to the fresh secret, and rerun the public end-to-end checks.
-4. Confirm final cleanup and remove the retired credentials only after the replacement deployment is verified.
+Stage 4 is complete. Supabase remains authoritative, the production application is connected to the real spreadsheet, reference-based updates do not create duplicate rows, failed synchronization can be retried without changing financial totals, and no temporary Stage 4 test data remains.
 
 ### Exact next action
 
-Update the existing Vercel project's named environment variables from the matching values in `.env.local`, without using the bulk import or revealing any saved value. Apply them to Production and Preview.
+When ready, begin Stage 5 with the official Test 1 and Test 2 demonstrations, final permission/error checks, and final submission preparation. Do not enter the official references before that stage begins.
 
 ### Live verification completed before the security stop
 
@@ -181,4 +180,4 @@ Update the existing Vercel project's named environment variables from the matchi
 
 ### Security recovery
 
-During an earlier Vercel environment-variable import preview, Vercel's settings interface unexpectedly rendered protected values in automation diagnostic output. No credential was committed, copied into source code, or exposed to browser application code. Replacement Supabase, Telegram, Google, and webhook credentials are now stored locally and verified. The repository secret scan passes. The existing Vercel project still requires a manual value update before deployment because the safe automation tools cannot transmit those values without returning them in diagnostic output.
+During an earlier Vercel environment-variable import preview, Vercel's settings interface unexpectedly rendered protected values in automation diagnostic output. No credential was committed, copied into source code, or exposed to browser application code. Replacement Supabase, Telegram, Google, and webhook credentials are stored privately and verified through minimum authenticated functionality. Vercel was updated manually, the replacement production deployment is verified, and the repository secret scan passes.
