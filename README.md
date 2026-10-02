@@ -1,6 +1,6 @@
 # Friends Included Finance System
 
-This repository contains the working Stage 2 website for the Day 4 managerial accounting homework. Supabase is the source of truth; Telegram and the website share one server-side transaction processor; Google Sheets will later become a synchronized readable copy.
+This repository contains the working Stage 3 website and Telegram integration for the Day 4 managerial accounting homework. Supabase is the source of truth; Telegram and the website share one server-side transaction processor; Google Sheets will later become a synchronized readable copy.
 
 ## Current architecture
 
@@ -58,11 +58,11 @@ pnpm build
 
 The existing initial migration already supports Stage 2. No additional migration, reset, table deletion, or schema recreation was needed. The live smoke-test records and related jobs were removed after verification.
 
-### Remaining work
+### Work completed in later stages
 
-- Stage 3+: create and connect the real Telegram bot, employee linking, real notifications, and retry delivery.
-- Stage 3+: connect a Google service account and spreadsheet, then implement reference-based row upserts and retries.
-- Final stage: deploy to Vercel, complete the submission links/instructions, and run the official Telegram-dependent Test 1 and Test 2 demonstrations.
+- Stage 3: the real Telegram bot, employee linking, real notifications, retry delivery, GitHub repository, and Vercel deployment are complete.
+- Stage 4: connect a Google service account and spreadsheet, then implement reference-based row upserts and retries.
+- Final stage: complete the submission links/instructions and run the official Telegram-dependent Test 1 and Test 2 demonstrations.
 
 ### Known bugs
 
@@ -74,7 +74,7 @@ From normal Windows PowerShell in this project folder, run `corepack pnpm dev`, 
 
 ## External setup state
 
-Supabase is connected and verified. The real Telegram bot token is verified, but the webhook is not active until a public Vercel URL exists. Google Sheets remains intentionally unconfigured.
+Supabase is connected and verified. The real Telegram bot and authenticated public webhook are active. Google Sheets remains intentionally unconfigured.
 
 ## Stage 3 progress
 
@@ -108,6 +108,10 @@ Supabase is connected and verified. The real Telegram bot token is verified, but
 - While awaiting allocation, the live dashboard counted the expense in the company result but excluded it from both projects.
 - Svetlana changed the sale split from 40/30/30 to 50/25/25 and changed the expense allocation from Project B to Project A. Both original proposals and final decisions remain separately stored.
 - The final dynamic results are €100 approved income, €10 commission, €25 Project A expense, and €65 company/Project A result. Both decision notification jobs report one successful delivery to each transaction's original chat.
+- Both real manager-decision messages were visibly received in the student's Telegram chat.
+- The live link/relink and notification failure/retry safeguards were rerun successfully with the rotated credentials.
+- The final ESLint, TypeScript, 34 regular tests, two gated live tests, and production build all pass.
+- All `TGTEST` and live-test transaction data was removed after verification. The useful real Telegram employee link remains, currently assigned to Kevin.
 
 ### Public deployment and webhook state
 
@@ -116,14 +120,12 @@ Supabase is connected and verified. The real Telegram bot token is verified, but
 - Vercel project: created and connected to the homework repository with server-only environment values stored as protected settings.
 - Public Vercel deployment: live at `https://wedding-guests-for-hire-three.vercel.app`.
 - Telegram webhook: active at the authenticated public webhook route with no reported delivery error.
-- Real Telegram account transactions: verified for the temporary sale and expense submissions and confirmations.
-- Real Telegram manager-decision notifications: Supabase records both as sent; personal receipt confirmation is the remaining human check.
+- Real Telegram account transactions: verified for sale and expense submission, refusal rules, confirmations, manager corrections, and persistence before the temporary records were removed.
+- Real Telegram manager-decision notifications: both were recorded as sent and personally confirmed as received.
 
-### Remaining Stage 3 work
+### Stage 3 status
 
-1. Confirm the two real manager-decision messages were visibly received in the student's Telegram chat.
-2. Reconfirm retry/idempotency safeguards, run the complete local quality checks, and review the public deployment.
-3. Remove the temporary `TGTEST` records and notification/decision jobs while keeping the useful real employee link.
+Stage 3 is complete. No temporary Telegram transaction, manager-decision, notification, or synchronization test data remains. The real employee link and authenticated webhook remain active for later official tests.
 
 ### Known errors
 
@@ -131,4 +133,4 @@ No local code, database, test, or runtime errors are known. Vercel's first insta
 
 ### Exact next action
 
-Confirm that Telegram received both the changed sale decision (40/30/30 to 50/25/25) and changed expense decision (Project B to Project A). Then finish cleanup and the final Stage 3 verification suite.
+Begin Stage 4 by creating or choosing a Google Cloud project, enabling the Google Sheets API, creating a service account, and creating the homework spreadsheet with `Sales` and `Expenses` tabs. Share that spreadsheet with the service account email. Keep the service-account credentials private and out of GitHub and chat; they will be stored only in protected local and Vercel environment settings when Stage 4 begins.
