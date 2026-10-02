@@ -99,6 +99,9 @@ Supabase is connected and verified. The real Telegram bot token is verified, but
 - A temporary live notification failure/retry test passed without changing financial totals and cleaned up.
 - ESLint, TypeScript, 34 regular tests, and the production build pass.
 - The Stage 2 sale form, expense form, manager area, records, and dashboard still load successfully.
+- The real Telegram account reached `/start`, was refused while unlinked, and was then linked to Richard only through Svetlana's live manager screen.
+- Real Telegram sale `TGTEST-SALE-1` reached Supabase with Richard, the original Telegram identity/chat, €100.00, Project A, 40/30/30, and Pending Approval preserved.
+- The real sale confirmation notification was delivered once, and a fresh website load shows the same pending record while approved income and commission remain zero.
 
 ### Public deployment and webhook state
 
@@ -107,16 +110,15 @@ Supabase is connected and verified. The real Telegram bot token is verified, but
 - Vercel project: created and connected to the homework repository with server-only environment values stored as protected settings.
 - Public Vercel deployment: live at `https://wedding-guests-for-hire-three.vercel.app`.
 - Telegram webhook: active at the authenticated public webhook route with no reported delivery error.
-- Real Telegram account transaction: not performed yet.
+- Real Telegram account transaction: verified for the temporary sale submission and confirmation.
 - Real Telegram manager-decision notification: not performed yet.
 
 ### Remaining Stage 3 work
 
-1. Perform the required real `/start` and unlinked-denial checks from the student's Telegram account.
-2. Link the real Telegram user to Richard, submit the temporary sale, and verify its stored employee and original chat.
-3. Relink the same user to Kevin, submit the temporary expense, and verify the earlier sale remains unchanged.
-4. Complete both manager decisions and verify the real Telegram notifications and safe retry behavior.
-5. Remove the temporary `TGTEST` records while keeping the useful real employee link.
+1. Perform the real invalid-amount and invalid-commission-split Telegram checks and confirm neither creates a record.
+2. Relink the same user to Kevin, submit the temporary expense, and verify the earlier sale remains unchanged.
+3. Complete both manager decisions and verify the real Telegram notifications and safe retry behavior.
+4. Remove the temporary `TGTEST` records while keeping the useful real employee link.
 
 ### Known errors
 
@@ -124,4 +126,4 @@ No local code, database, test, or runtime errors are known. Vercel's first insta
 
 ### Exact next action
 
-From the real Telegram account, send `/start` to `@FriendsIncludedHomeworkBot`, then attempt the documented temporary unlinked sale. Use the numeric Telegram user ID returned by the bot for Svetlana's manager-only linking step.
+From the linked Richard account, send the two temporary invalid-sale messages documented in the current Stage 3 test instructions, then confirm both were refused before relinking the account to Kevin.
