@@ -4,13 +4,23 @@ import { SupabaseSideEffectQueue } from "@/src/integrations/supabase/side-effect
 import { SupabaseTelegramLinkRepository } from "@/src/integrations/supabase/telegram-links";
 import { SupabaseTransactionRepository } from "@/src/integrations/supabase/transaction-repository";
 import { createTelegramGatewayIfConfigured } from "@/src/integrations/telegram/client";
+import { createGoogleSheetsGatewayIfConfigured } from "@/src/integrations/google-sheets/gateway";
 
 export function createServerServices() {
   const client = getSupabaseAdminClient();
   const repository = new SupabaseTransactionRepository(client);
   const telegramGateway = createTelegramGatewayIfConfigured();
-  const sideEffects = new SupabaseSideEffectQueue(client, telegramGateway);
+  const googleSheetsGateway = createGoogleSheetsGatewayIfConfigured();
+  const sideEffects = new SupabaseSideEffectQueue(client, telegramGateway, googleSheetsGateway);
   const telegramLinks = new SupabaseTelegramLinkRepository(client);
   const processor = new TransactionProcessor(repository, sideEffects);
-  return { client, repository, sideEffects, telegramGateway, telegramLinks, processor };
+  return {
+    client,
+    repository,
+    sideEffects,
+    telegramGateway,
+    googleSheetsGateway,
+    telegramLinks,
+    processor,
+  };
 }

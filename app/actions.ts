@@ -193,3 +193,25 @@ export async function retryTelegramNotificationAction(
     return actionError(error);
   }
 }
+
+export async function retryGoogleSheetSyncAction(
+  _previousState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    const { actor, sideEffects } = await actorFrom(formData);
+    const result = await sideEffects.retrySheetSync(
+      actor,
+      formText(formData, "transactionId"),
+    );
+    revalidatePath("/");
+    return {
+      status: result === "SYNCED" ? "success" : "error",
+      message: result === "SYNCED"
+        ? "Google Sheets synchronization completed."
+        : "Google Sheets synchronization failed again and remains available for retry.",
+    };
+  } catch (error) {
+    return actionError(error);
+  }
+}

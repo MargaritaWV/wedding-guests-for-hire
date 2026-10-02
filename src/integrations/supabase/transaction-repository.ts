@@ -482,8 +482,12 @@ export class SupabaseTransactionRepository implements TransactionRepository {
       sheetState === "SYNCED"
         ? "Synchronized"
         : sheetState === "FAILED"
-          ? "Synchronization failed"
-          : "Synchronization not configured";
+          ? "Sync failed"
+          : sheetState === "PENDING" && String(syncJob?.last_error ?? "").includes("not configured")
+            ? "Synchronization not configured"
+            : sheetState === "PENDING"
+              ? "Sync pending"
+              : "Synchronization not configured";
     const notificationState = notification
       ? (notification.state as "PENDING" | "SENT" | "FAILED" | "NOT_REQUIRED")
       : "NONE";

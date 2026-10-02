@@ -134,3 +134,51 @@ No local code, database, test, or runtime errors are known. Vercel's first insta
 ### Exact next action
 
 Begin Stage 4 by creating or choosing a Google Cloud project, enabling the Google Sheets API, creating a service account, and creating the homework spreadsheet with `Sales` and `Expenses` tabs. Share that spreadsheet with the service account email. Keep the service-account credentials private and out of GitHub and chat; they will be stored only in protected local and Vercel environment settings when Stage 4 begins.
+
+## Stage 4 progress
+
+### Completed locally
+
+- Reread the complete authoritative homework specification and confirmed Supabase remains the source of truth.
+- Identified the single downloaded service-account JSON by its project-related filename without inspecting unrelated Downloads files.
+- Verified the replacement credential structure and authenticated it with Google without printing or copying any credential value.
+- Stored the service-account email and private key only in the ignored `.env.local`; the downloaded JSON remains unchanged in Downloads.
+- Implemented direct server-side Google Sheets API access without adding a package.
+- Added separate readable Sales and Expenses row serializers with the required columns.
+- Added reference-based insert/update behavior, header creation, simple formatting, row-number tracking, honest failure state, and manager-only retry.
+- Website and Telegram submissions continue through the shared transaction processor and therefore use the same synchronization path.
+- Added regular tests for pending/approved sales, awaiting/allocated expenses, reference-based insert/update, placeholder configuration, and client-side secret exclusion.
+- ESLint, TypeScript, all 40 regular tests, both live Google integration tests, and the production build pass at this checkpoint.
+
+### Configuration state
+
+- Replacement Supabase, Telegram, and Google credentials: verified through minimum authenticated actions.
+- A fresh Telegram webhook secret: generated and stored privately.
+- Local service-account variables: configured privately with the replacement key.
+- Spreadsheet ID: configured locally from the user-provided URL.
+- Real spreadsheet headers and live synchronization: verified successfully for Sales and Expenses.
+- Vercel Google environment variables and deployment: not changed yet.
+
+### Remaining Stage 4 work
+
+1. Update the named protected values manually in the existing Vercel project without using import, pull, preview, or value-revealing diagnostics.
+2. Push the already verified Stage 4 commit so the existing Vercel project deploys it.
+3. Verify the public connected state, reset the Telegram webhook to the fresh secret, and rerun the public end-to-end checks.
+4. Confirm final cleanup and remove the retired credentials only after the replacement deployment is verified.
+
+### Exact next action
+
+Update the existing Vercel project's named environment variables from the matching values in `.env.local`, without using the bulk import or revealing any saved value. Apply them to Production and Preview.
+
+### Live verification completed before the security stop
+
+- The real service account authenticated and accessed the shared spreadsheet.
+- The required Sales and Expenses headers were written and formatted.
+- A real temporary sale and expense synchronized successfully.
+- Manager decisions updated the same rows without duplicates.
+- A controlled Sheets failure was stored as failed, and retry restored the same row without changing financial totals.
+- The two live Google integration tests passed and their cleanup hooks removed their temporary database records and spreadsheet rows.
+
+### Security recovery
+
+During an earlier Vercel environment-variable import preview, Vercel's settings interface unexpectedly rendered protected values in automation diagnostic output. No credential was committed, copied into source code, or exposed to browser application code. Replacement Supabase, Telegram, Google, and webhook credentials are now stored locally and verified. The repository secret scan passes. The existing Vercel project still requires a manual value update before deployment because the safe automation tools cannot transmit those values without returning them in diagnostic output.

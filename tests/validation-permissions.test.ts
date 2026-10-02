@@ -11,6 +11,9 @@ describe("permissions", () => {
     expect(canPerform("expense_reporter", "submit_expense")).toBe(true);
     expect(canPerform("manager", "make_manager_decision")).toBe(true);
     expect(canPerform("salesperson", "make_manager_decision")).toBe(false);
+    expect(canPerform("manager", "retry_sheet_sync")).toBe(true);
+    expect(canPerform("salesperson", "retry_sheet_sync")).toBe(false);
+    expect(canPerform("expense_reporter", "retry_sheet_sync")).toBe(false);
   });
 });
 

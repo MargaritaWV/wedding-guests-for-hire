@@ -5,6 +5,7 @@ import { createServerServices } from "@/src/application/server-services";
 import type { FinanceSnapshot, TelegramLinkView } from "@/src/application/read-models";
 import { getIntegrationReadiness } from "@/src/integrations/config";
 import { createTelegramGatewayIfConfigured } from "@/src/integrations/telegram/client";
+import { createGoogleSheetsGatewayIfConfigured } from "@/src/integrations/google-sheets/gateway";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,7 @@ export default async function Home({
   let telegramLinks: TelegramLinkView[] = [];
   let databaseMessage: string | null = null;
   let telegramConnected = false;
+  let googleSheetsConnected = false;
   let telegramBotUsername: string | null = null;
 
   try {
@@ -53,6 +55,16 @@ export default async function Home({
     // Telegram remains unverified without exposing connection details to the page.
   }
 
+  try {
+    const sheets = createGoogleSheetsGatewayIfConfigured();
+    if (sheets) {
+      await sheets.verifyConnection();
+      googleSheetsConnected = true;
+    }
+  } catch {
+    // Google Sheets remains unverified without exposing connection details to the page.
+  }
+
   const summary = calculateFinancialSummary(snapshot.sales, snapshot.expenses);
 
   return (
@@ -65,6 +77,7 @@ export default async function Home({
       readiness={getIntegrationReadiness({
         supabaseConnected: connected,
         telegramConnected,
+        googleSheetsConnected,
       })}
       databaseMessage={databaseMessage}
     />

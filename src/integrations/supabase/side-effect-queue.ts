@@ -3,6 +3,9 @@ import type { NotificationKind, SideEffectQueue, TransactionKind } from "@/src/a
 import { DomainError } from "@/src/domain/errors";
 import type { Actor, AllocationTarget, CommissionSplit } from "@/src/domain/types";
 import { assertCanPerform } from "@/src/domain/permissions";
+import type { GoogleSheetsGateway, SheetRow, SheetTab } from "@/src/integrations/google-sheets/gateway";
+import { safeGoogleSheetsError } from "@/src/integrations/google-sheets/gateway";
+import { serializeExpenseRow, serializeSaleRow } from "@/src/integrations/google-sheets/rows";
 import type { TelegramGateway } from "@/src/integrations/telegram/client";
 import {
   formatExpenseDecisionMessage,
@@ -35,6 +38,10 @@ function integer(value: unknown): number {
   return result;
 }
 
+function nullableInteger(value: unknown): number | null {
+  return value === null || value === undefined ? null : integer(value);
+}
+
 function safeDeliveryError(error: unknown): string {
   const message = error instanceof Error ? error.message : "Telegram delivery failed.";
   return message.slice(0, 500);
@@ -44,6 +51,7 @@ export class SupabaseSideEffectQueue implements SideEffectQueue {
   constructor(
     private readonly client: SupabaseClient,
     private readonly telegram: TelegramGateway | null,
+    private readonly googleSheets: GoogleSheetsGateway | null = null,
   ) {}
 
   async queueSheetSync(transactionId: string, kind: TransactionKind): Promise<void> {
@@ -52,7 +60,7 @@ export class SupabaseSideEffectQueue implements SideEffectQueue {
         transaction_id: transactionId,
         sheet_tab: kind === "sale" ? "Sales" : "Expenses",
         state: "PENDING",
-        last_error: "Google Sheets synchronization is not configured.",
+        last_error: this.googleSheets ? null : "Google Sheets synchronization is not configured.",
         synced_at: null,
         next_retry_at: null,
       },
@@ -65,6 +73,18 @@ export class SupabaseSideEffectQueue implements SideEffectQueue {
         error,
       );
     }
+    if (this.googleSheets) await this.deliverSheetSync(transactionId);
+  }
+
+  async retrySheetSync(
+    manager: Actor,
+    transactionId: string,
+  ): Promise<"SYNCED" | "FAILED"> {
+    assertCanPerform(manager.role, "retry_sheet_sync");
+    if (!this.googleSheets) {
+      throw new DomainError("INTEGRATION_NOT_CONFIGURED", "Google Sheets is not configured.");
+    }
+    return this.deliverSheetSync(transactionId);
   }
 
   async queueNotification(input: {
@@ -185,6 +205,136 @@ export class SupabaseSideEffectQueue implements SideEffectQueue {
       }
       return "FAILED";
     }
+  }
+
+  private async deliverSheetSync(transactionId: string): Promise<"SYNCED" | "FAILED"> {
+    if (!this.googleSheets) {
+      throw new DomainError("INTEGRATION_NOT_CONFIGURED", "Google Sheets is not configured.");
+    }
+    const { data, error } = await this.client
+      .from("google_sheet_sync_jobs")
+      .select("sheet_tab,attempt_count")
+      .eq("transaction_id", transactionId)
+      .maybeSingle();
+    if (error) throw new DomainError("PERSISTENCE_FAILED", "The synchronization job could not be loaded.", error);
+    if (!data) throw new DomainError("TRANSACTION_NOT_FOUND", "The synchronization job no longer exists.");
+    const tab = data.sheet_tab as SheetTab;
+    const attemptCount = integer(data.attempt_count) + 1;
+    try {
+      const row = await this.buildSheetRow(transactionId, tab);
+      const result = await this.googleSheets.upsertByReference(tab, row);
+      const { error: updateError } = await this.client
+        .from("google_sheet_sync_jobs")
+        .update({
+          state: "SYNCED",
+          row_number: result.rowNumber,
+          attempt_count: attemptCount,
+          last_attempt_at: new Date().toISOString(),
+          synced_at: new Date().toISOString(),
+          next_retry_at: null,
+          last_error: null,
+        })
+        .eq("transaction_id", transactionId);
+      if (updateError) throw updateError;
+      return "SYNCED";
+    } catch (syncError) {
+      const { error: updateError } = await this.client
+        .from("google_sheet_sync_jobs")
+        .update({
+          state: "FAILED",
+          attempt_count: attemptCount,
+          last_attempt_at: new Date().toISOString(),
+          synced_at: null,
+          next_retry_at: new Date(Date.now() + 5 * 60_000).toISOString(),
+          last_error: safeGoogleSheetsError(syncError),
+        })
+        .eq("transaction_id", transactionId);
+      if (updateError) {
+        throw new DomainError(
+          "PERSISTENCE_FAILED",
+          "Google Sheets synchronization failed and its retry state could not be saved.",
+          updateError,
+        );
+      }
+      return "FAILED";
+    }
+  }
+
+  private async buildSheetRow(transactionId: string, tab: SheetTab): Promise<SheetRow> {
+    const { data: transaction, error: transactionError } = await this.client
+      .from("transactions")
+      .select("reference,submitted_at,submitted_by_employee_id")
+      .eq("id", transactionId)
+      .maybeSingle();
+    if (transactionError || !transaction) {
+      throw new DomainError("PERSISTENCE_FAILED", "The transaction could not be prepared for synchronization.", transactionError);
+    }
+    const [employeeResult, detailResult] = await Promise.all([
+      this.client
+        .from("employees")
+        .select("display_name")
+        .eq("id", transaction.submitted_by_employee_id)
+        .maybeSingle(),
+      this.client
+        .from(tab === "Sales" ? "sales" : "expenses")
+        .select("*")
+        .eq("transaction_id", transactionId)
+        .maybeSingle(),
+    ]);
+    if (employeeResult.error || detailResult.error || !employeeResult.data || !detailResult.data) {
+      throw new DomainError(
+        "PERSISTENCE_FAILED",
+        "The transaction details could not be prepared for synchronization.",
+        employeeResult.error ?? detailResult.error,
+      );
+    }
+    const detail = detailResult.data as DbRow;
+    const reference = String(transaction.reference);
+    const submittedAt = String(transaction.submitted_at);
+    const submitter = String(employeeResult.data.display_name);
+    if (tab === "Sales") {
+      const status = detail.status as "PENDING_APPROVAL" | "APPROVED";
+      const finalRichard = nullableInteger(detail.final_richard_percent);
+      const finalAnastasia = nullableInteger(detail.final_anastasia_percent);
+      const finalJeanClaude = nullableInteger(detail.final_jean_claude_percent);
+      return serializeSaleRow({
+        reference,
+        submittedAt,
+        salesperson: submitter,
+        customer: String(detail.customer),
+        project: detail.project as "A" | "B",
+        description: String(detail.description),
+        amountCents: integer(detail.amount_cents),
+        proposedSplit: {
+          richard: integer(detail.proposed_richard_percent),
+          anastasia: integer(detail.proposed_anastasia_percent),
+          jeanClaude: integer(detail.proposed_jean_claude_percent),
+        },
+        finalSplit: finalRichard === null || finalAnastasia === null || finalJeanClaude === null
+          ? null
+          : { richard: finalRichard, anastasia: finalAnastasia, jeanClaude: finalJeanClaude },
+        commission: status === "APPROVED"
+          ? {
+              poolCents: integer(detail.commission_pool_cents),
+              richardCents: integer(detail.richard_commission_cents),
+              anastasiaCents: integer(detail.anastasia_commission_cents),
+              jeanClaudeCents: integer(detail.jean_claude_commission_cents),
+            }
+          : null,
+        status,
+      });
+    }
+    return serializeExpenseRow({
+      reference,
+      submittedAt,
+      reporter: submitter,
+      description: String(detail.description),
+      category: detail.category as "Materials" | "Travel" | "Other",
+      amountCents: integer(detail.amount_cents),
+      proposedAllocation: detail.proposed_allocation as AllocationTarget,
+      finalAllocation: (detail.final_allocation as AllocationTarget | null) ?? null,
+      status: detail.status as "AWAITING_ALLOCATION" | "ALLOCATED",
+    });
   }
 
   private async findEmployeeChat(employeeId: string): Promise<string | null> {

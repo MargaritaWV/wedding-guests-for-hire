@@ -6,6 +6,7 @@ import {
   allocateExpenseAction,
   approveSaleAction,
   linkTelegramUserAction,
+  retryGoogleSheetSyncAction,
   retryTelegramNotificationAction,
   submitExpenseAction,
   submitSaleAction,
@@ -150,6 +151,22 @@ function RetryNotification({
       <input type="hidden" name="transactionId" value={transactionId} />
       <input type="hidden" name="notificationKind" value={notificationKind} />
       <button type="submit">Retry Telegram</button>
+      <ActionMessage state={state} />
+    </form>
+  );
+}
+
+function RetrySheetSync({ transactionId }: { transactionId: string }) {
+  const [state, action] = useActionState(
+    retryGoogleSheetSyncAction,
+    INITIAL_ACTION_STATE,
+  );
+  useRefreshOnSuccess(state);
+  return (
+    <form action={action} className="retry-form">
+      <input type="hidden" name="actorCode" value="svetlana" />
+      <input type="hidden" name="transactionId" value={transactionId} />
+      <button type="submit">Retry Sheets</button>
       <ActionMessage state={state} />
     </form>
   );
@@ -435,7 +452,7 @@ function SalesTable({ sales, canRetry }: { sales: SaleRecordView[]; canRetry: bo
               <td>{formatEuro(sale.amountCents)}</td>
               <td>{splitLabel(sale.proposedSplit)}</td>
               <td>{sale.finalSplit ? <>{splitLabel(sale.finalSplit)}<br /><small>R {formatEuro(sale.commission?.richardCents ?? 0)} · A {formatEuro(sale.commission?.anastasiaCents ?? 0)} · J-C {formatEuro(sale.commission?.jeanClaudeCents ?? 0)}</small></> : "—"}</td>
-              <td><span className="record-status">{statusLabel(sale.status)}</span><br /><small>{sale.sheetMessage}<br />{sale.notificationMessage}</small>{canRetry && sale.notificationState === "FAILED" && sale.notificationKind && <RetryNotification transactionId={sale.transactionId} notificationKind={sale.notificationKind} />}</td>
+              <td><span className="record-status">{statusLabel(sale.status)}</span><br /><small>{sale.sheetMessage}<br />{sale.notificationMessage}</small>{canRetry && (sale.sheetState === "FAILED" || sale.sheetState === "PENDING") && <RetrySheetSync transactionId={sale.transactionId} />}{canRetry && sale.notificationState === "FAILED" && sale.notificationKind && <RetryNotification transactionId={sale.transactionId} notificationKind={sale.notificationKind} />}</td>
             </tr>
           ))}
         </tbody>
@@ -459,7 +476,7 @@ function ExpensesTable({ expenses, canRetry }: { expenses: ExpenseRecordView[]; 
               <td>{formatEuro(expense.amountCents)}</td>
               <td>{allocationLabel(expense.proposedAllocation)}</td>
               <td>{allocationLabel(expense.finalAllocation)}{expense.allocationWasAutomatic && <><br /><small>Automatic overhead</small></>}</td>
-              <td><span className="record-status">{statusLabel(expense.status)}</span><br /><small>{expense.sheetMessage}<br />{expense.notificationMessage}</small>{canRetry && expense.notificationState === "FAILED" && expense.notificationKind && <RetryNotification transactionId={expense.transactionId} notificationKind={expense.notificationKind} />}</td>
+              <td><span className="record-status">{statusLabel(expense.status)}</span><br /><small>{expense.sheetMessage}<br />{expense.notificationMessage}</small>{canRetry && (expense.sheetState === "FAILED" || expense.sheetState === "PENDING") && <RetrySheetSync transactionId={expense.transactionId} />}{canRetry && expense.notificationState === "FAILED" && expense.notificationKind && <RetryNotification transactionId={expense.transactionId} notificationKind={expense.notificationKind} />}</td>
             </tr>
           ))}
         </tbody>
@@ -566,6 +583,9 @@ export function FinanceApp({
               <h3>{item.name}</h3>
               <p className={`status ${item.state}`}>{item.label}</p>
               <p>{item.detail}</p>
+              {item.href && (
+                <p><a href={item.href} target="_blank" rel="noreferrer">Open Google Sheet</a></p>
+              )}
             </article>
           ))}
         </div>

@@ -6,7 +6,8 @@ export type ProtectedAction =
   | "submit_expense"
   | "make_manager_decision"
   | "manage_telegram_links"
-  | "retry_notification";
+  | "retry_notification"
+  | "retry_sheet_sync";
 
 const allowedRoles: Record<ProtectedAction, readonly EmployeeRole[]> = {
   submit_sale: ["salesperson"],
@@ -14,6 +15,7 @@ const allowedRoles: Record<ProtectedAction, readonly EmployeeRole[]> = {
   make_manager_decision: ["manager"],
   manage_telegram_links: ["manager"],
   retry_notification: ["manager"],
+  retry_sheet_sync: ["manager"],
 };
 
 export function canPerform(role: EmployeeRole, action: ProtectedAction): boolean {
