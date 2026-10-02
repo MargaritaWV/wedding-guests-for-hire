@@ -102,6 +102,8 @@ Supabase is connected and verified. The real Telegram bot token is verified, but
 - The real Telegram account reached `/start`, was refused while unlinked, and was then linked to Richard only through Svetlana's live manager screen.
 - Real Telegram sale `TGTEST-SALE-1` reached Supabase with Richard, the original Telegram identity/chat, €100.00, Project A, 40/30/30, and Pending Approval preserved.
 - The real sale confirmation notification was delivered once, and a fresh website load shows the same pending record while approved income and commission remain zero.
+- Real zero-amount and 60/30/20 Telegram sale attempts were refused and created no Supabase records.
+- Svetlana's live manager screen relinked the same Telegram account to Kevin; the earlier sale still stores Richard and its original chat independently of the current link.
 
 ### Public deployment and webhook state
 
@@ -115,10 +117,9 @@ Supabase is connected and verified. The real Telegram bot token is verified, but
 
 ### Remaining Stage 3 work
 
-1. Perform the real invalid-amount and invalid-commission-split Telegram checks and confirm neither creates a record.
-2. Relink the same user to Kevin, submit the temporary expense, and verify the earlier sale remains unchanged.
-3. Complete both manager decisions and verify the real Telegram notifications and safe retry behavior.
-4. Remove the temporary `TGTEST` records while keeping the useful real employee link.
+1. Submit the real temporary Kevin expense and verify its confirmation, stored reporter/chat, status, and financial treatment.
+2. Complete both manager decisions and verify the real Telegram notifications and safe retry behavior.
+3. Remove the temporary `TGTEST` records while keeping the useful real employee link.
 
 ### Known errors
 
@@ -126,4 +127,4 @@ No local code, database, test, or runtime errors are known. Vercel's first insta
 
 ### Exact next action
 
-From the linked Richard account, send the two temporary invalid-sale messages documented in the current Stage 3 test instructions, then confirm both were refused before relinking the account to Kevin.
+From the relinked Kevin account, send `/start` and the documented `TGTEST-EXP-1` expense command, then confirm the bot recorded the expense.
