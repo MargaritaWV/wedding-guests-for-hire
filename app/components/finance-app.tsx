@@ -93,6 +93,13 @@ function TelegramSetup({
         )}
         , send <code>/start</code>, and copy the numeric user ID shown by the bot.
       </p>
+      {botUsername && (
+        <p>
+          <a href={`https://t.me/${botUsername}`} target="_blank" rel="noreferrer">
+            Open Telegram Bot
+          </a>
+        </p>
+      )}
       <form action={action} className="inline-form telegram-link-form">
         <input type="hidden" name="actorCode" value="svetlana" />
         <label>
@@ -523,7 +530,7 @@ export function FinanceApp({
       <header className="hero">
         <p className="eyebrow">Friends Included Ltd</p>
         <h1>Finance workspace</h1>
-        <p>Student: Margarita Posti</p>
+        <p>Student: Margarita Postevaja</p>
         <p>
           Enter transactions, make manager decisions, and see results calculated from the Supabase
           source of truth.
