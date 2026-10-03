@@ -523,6 +523,7 @@ export function FinanceApp({
       <header className="hero">
         <p className="eyebrow">Friends Included Ltd</p>
         <h1>Finance workspace</h1>
+        <p>Student: Margarita Posti</p>
         <p>
           Enter transactions, make manager decisions, and see results calculated from the Supabase
           source of truth.
@@ -589,6 +590,16 @@ export function FinanceApp({
             </article>
           ))}
         </div>
+        <p>
+          Source code: {" "}
+          <a
+            href="https://github.com/MargaritaWV/wedding-guests-for-hire"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Open GitHub repository
+          </a>
+        </p>
       </section>
     </main>
   );
